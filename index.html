@@ -1,0 +1,711 @@
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор сметы Генподрядчика (с сохранением)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #f0f4f8 0%, #e6ecf3 100%);
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            padding: 32px;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 24px;
+            color: #0b1e33;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        h1:before {
+            content: '🏗️';
+            font-size: 32px;
+        }
+        h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+            color: #1e3a5f;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge {
+            background: #1e3a5f;
+            color: white;
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        .section {
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 20px -6px rgba(0,20,40,0.12);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        th {
+            background: #eef2f6;
+            color: #1e3a5f;
+            font-weight: 600;
+            padding: 14px 12px;
+            text-align: left;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            background: white;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            font-size: 14px;
+            background: #f9fcff;
+            transition: 0.15s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b6e9c;
+            box-shadow: 0 0 0 4px rgba(30,58,95,0.15);
+            background: white;
+        }
+        .btn {
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 14px -8px #1e3a5f80;
+            margin-right: 12px;
+        }
+        .btn:hover {
+            background: #14324f;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 20px -8px #1e3a5f;
+        }
+        .btn-outline {
+            background: white;
+            color: #1e3a5f;
+            border: 1px solid #1e3a5f;
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background: #eef2f6;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-danger {
+            background: #b91c1c;
+            box-shadow: 0 8px 14px -8px #b91c1c80;
+        }
+        .btn-danger:hover {
+            background: #991b1b;
+        }
+        .row-flex {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .form-group {
+            flex: 1 1 200px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #4b5e77;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .result-block {
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #a0b8cc;
+            font-size: 15px;
+        }
+        .result-item.total {
+            font-weight: 700;
+            font-size: 18px;
+            border-bottom: none;
+            border-top: 2px solid #1e3a5f;
+            margin-top: 10px;
+            padding-top: 16px;
+            color: #0b1e33;
+        }
+        .text-right {
+            text-align: right;
+            font-weight: 500;
+        }
+        .indent {
+            padding-left: 36px !important;
+            background-color: #fafcfd;
+        }
+        .match-panel {
+            background: #d9eaf5;
+            border-radius: 60px;
+            padding: 12px 24px;
+            margin-bottom: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 500;
+            border: 1px solid #b6d2e6;
+            color: #0b2a44;
+        }
+        .match-panel span:last-child {
+            background: #1e3a5f;
+            color: white;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 18px;
+        }
+        .footnote {
+            font-size: 12px;
+            color: #6f7e95;
+            margin-top: 10px;
+        }
+        .tz-output {
+            background: #0b1e33;
+            color: #e2e8f0;
+            border-radius: 24px;
+            padding: 24px;
+            margin-top: 30px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            border: 1px solid #2d4a6b;
+            display: none;
+        }
+        .tz-output.show {
+            display: block;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 32px 0 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Формирование сметы Генподрядчика (с сохранением данных)</h1>
+
+    <!-- Панель равенства -->
+    <div class="match-panel">
+        <span>✅ Раздел 4 (лимит ГП): <strong id="match-limit">0</strong></span>
+        <span>✅ Раздел 5 (смета для банка): <strong id="match-bank">0</strong></span>
+        <span>✓ Итоги совпадают</span>
+    </div>
+
+    <!-- Раздел 1: Бюджет (исправленный заголовок) -->
+    <div class="section">
+        <h2><span class="badge">1</span> Бюджет Главы 2 (данные из формы 6.1.2.)</h2>
+        <table>
+            <thead>
+                <tr><th>Код</th><th>Статья затрат</th><th>Сумма, ₽</th></tr>
+            </thead>
+            <tbody id="budget-rows"></tbody>
+            <tfoot>
+                <tr><td colspan="2"><strong>ИТОГО Глава 2</strong></td><td><strong id="total-budget">0</strong></td></tr>
+            </tfoot>
+        </table>
+        <div class="footnote">* статьи 2.6–2.9 исключаются из объёма генподрядчика</div>
+    </div>
+
+    <!-- Раздел 2: Прямые поставщики -->
+    <div class="section">
+        <h2><span class="badge">2</span> Прямые договоры (вычитаются из статей 2.1–2.5)</h2>
+        <table>
+            <thead>
+                <tr><th>Поставщик</th><th>Договор</th><th>Сумма, ₽</th><th>Статья</th><th style="width:50px"></th></tr>
+            </thead>
+            <tbody id="direct-rows"></tbody>
+        </table>
+        <button class="btn btn-outline" id="add-direct-row" style="margin-top:16px;">+ Добавить прямого поставщика</button>
+    </div>
+
+    <!-- Раздел 3: Параметры ГП -->
+    <div class="section">
+        <h2><span class="badge">3</span> Параметры договора ГП</h2>
+        <div class="row-flex">
+            <div class="form-group"><label>Накладные расходы, %</label><input type="number" id="overhead-percent" value="10.0" step="0.1"></div>
+            <div class="form-group"><label>Сметная прибыль, %</label><input type="number" id="profit-percent" value="6.6" step="0.1"></div>
+        </div>
+    </div>
+
+    <!-- Раздел 4: Расчёт лимита -->
+    <div class="section">
+        <h2><span class="badge">4</span> Лимит договора ГП</h2>
+        <div class="result-block">
+            <div class="result-item"><span>Сумма статей 2.1–2.5 (A):</span> <span id="sum-non-excluded">0</span></div>
+            <div class="result-item"><span>Минус прямые поставки по статьям 2.1–2.5 (B):</span> <span id="total-direct-limit">0</span></div>
+            <div class="result-item total"><span>Лимит договора ГП (A – B):</span> <span id="r4-limit">0</span></div>
+            <div style="margin-top:20px; border-top:2px solid #b6c9dd; padding-top:16px;">
+                <div class="result-item"><span>Прямые затраты (себестоимость):</span> <span id="r4-direct">0</span></div>
+                <div class="result-item"><span>Накладные расходы:</span> <span id="r4-overhead">0</span></div>
+                <div class="result-item"><span>Сметная прибыль:</span> <span id="r4-profit">0</span></div>
+                <div class="result-item total"><span>ИТОГО договор ГП (равен лимиту):</span> <span id="r4-total">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Раздел 5: Смета для банка -->
+    <div class="section">
+        <h2><span class="badge">5</span> Смета ГП для банка (статьи 2.1–2.5)</h2>
+        <table>
+            <thead>
+                <tr><th>Статья</th><th>Лимит по бюджету, ₽</th><th>Прямые поставки, ₽</th><th>Сумма в смете ГП, ₽</th></tr>
+            </thead>
+            <tbody id="bank-rows"></tbody>
+            <tfoot>
+                <tr><td colspan="3"><strong>Итого смета ГП (только конечные статьи)</strong></td><td><strong id="bank-total">0</strong></td></tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Кнопки действий -->
+    <div class="button-group">
+        <button class="btn" id="generate-tz">📋 Составить ТЗ для отдела ПТО</button>
+        <button class="btn btn-outline" id="print-tz">🖨️ Распечатать ТЗ</button>
+    </div>
+    <div id="tz-output" class="tz-output"></div>
+
+</div>
+
+<script>
+    (function() {
+        // -------------------------------------------------------------
+        //  ЕДИНЫЙ МАССИВ ДАННЫХ
+        // -------------------------------------------------------------
+        const articles = [
+            { code: '2.1',   name: 'Подготовительный период', excluded: false },
+            { code: '2.2.1', name: 'Внутренняя отделка реализуемых площадей', excluded: false },
+            { code: '2.2.2', name: 'Общестроительные работы (кроме отделки)', excluded: false },
+            { code: '2.3',   name: 'Внутренние инженерные системы', excluded: false },
+            { code: '2.4',   name: 'Наружные инженерные сети, техприсоединение', excluded: false },
+            { code: '2.5',   name: 'Благоустройство и озеленение', excluded: false },
+            { code: '2.6',   name: 'Содержание службы заказчика, охрана', excluded: true },
+            { code: '2.7',   name: 'Проектные работы, экспертиза, авторский надзор', excluded: true },
+            { code: '2.8',   name: 'Резерв на непредвиденные', excluded: true },
+            { code: '2.9',   name: 'Резерв на инфляцию', excluded: true }
+        ];
+
+        // Бюджет по умолчанию (из файла)
+        const defaultBudget = {
+            '2.1':   49828259.44,
+            '2.2.1': 31866900.00,
+            '2.2.2': 314152576.55,
+            '2.3':   61448739.81,
+            '2.4':   21175742.64,
+            '2.5':   19810429.25,
+            '2.6':   4000000.00,
+            '2.7':   44830000.00,
+            '2.8':   26806612.40,
+            '2.9':   50903148.00
+        };
+
+        // Прямые договоры по умолчанию
+        const defaultDirectRows = [
+            { supplier: 'ООО "Веголос Инженеринг"', contract: '02-12 (2.1)',   amount: 27435629.72, article: '2.1' },
+            { supplier: 'ООО "Веголос Инженеринг"', contract: '02-12 (2.2.2)', amount: 159602334.31, article: '2.2.2' },
+            { supplier: 'ООО "Веголос Инженеринг"', contract: '02-12 (2.3)',   amount: 31413530.67, article: '2.3' },
+            { supplier: 'ООО "Веголос Инженеринг"', contract: '02-12 (2.4)',   amount: 10857877.45, article: '2.4' },
+            { supplier: 'ООО "Газтехсервис"',       contract: '002',           amount: 18735.80,    article: '2.4' }
+        ];
+
+        // Проценты по умолчанию
+        const defaultOverhead = 10.0;
+        const defaultProfit = 6.6;
+
+        // -------------------------------------------------------------
+        //  ЗАГРУЗКА ИЗ LOCALSTORAGE
+        // -------------------------------------------------------------
+        let budget = { ...defaultBudget };
+        let directRows = JSON.parse(JSON.stringify(defaultDirectRows)); // глубокое копирование
+        let overheadPercent = defaultOverhead;
+        let profitPercent = defaultProfit;
+
+        function loadFromStorage() {
+            try {
+                const savedBudget = localStorage.getItem('calc_budget');
+                if (savedBudget) budget = { ...budget, ...JSON.parse(savedBudget) };
+
+                const savedDirect = localStorage.getItem('calc_directRows');
+                if (savedDirect) directRows = JSON.parse(savedDirect);
+
+                const savedOverhead = localStorage.getItem('calc_overhead');
+                if (savedOverhead) overheadPercent = parseFloat(savedOverhead);
+
+                const savedProfit = localStorage.getItem('calc_profit');
+                if (savedProfit) profitPercent = parseFloat(savedProfit);
+            } catch (e) {
+                console.warn('Ошибка загрузки из localStorage', e);
+            }
+        }
+
+        function saveToStorage() {
+            try {
+                localStorage.setItem('calc_budget', JSON.stringify(budget));
+                localStorage.setItem('calc_directRows', JSON.stringify(directRows));
+                localStorage.setItem('calc_overhead', overheadPercent.toString());
+                localStorage.setItem('calc_profit', profitPercent.toString());
+            } catch (e) {}
+        }
+
+        loadFromStorage();
+
+        // -------------------------------------------------------------
+        //  ЭЛЕМЕНТЫ ИНТЕРФЕЙСА
+        // -------------------------------------------------------------
+        const tbodyBudget = document.getElementById('budget-rows');
+        const tbodyDirect = document.getElementById('direct-rows');
+        const tbodyBank = document.getElementById('bank-rows');
+        const addBtn = document.getElementById('add-direct-row');
+
+        const totalBudgetSpan = document.getElementById('total-budget');
+        const sumNonExcludedSpan = document.getElementById('sum-non-excluded');
+        const totalDirectLimitSpan = document.getElementById('total-direct-limit');
+        const r4LimitSpan = document.getElementById('r4-limit');
+        const r4DirectSpan = document.getElementById('r4-direct');
+        const r4OverheadSpan = document.getElementById('r4-overhead');
+        const r4ProfitSpan = document.getElementById('r4-profit');
+        const r4TotalSpan = document.getElementById('r4-total');
+        const bankTotalSpan = document.getElementById('bank-total');
+        const matchLimitSpan = document.getElementById('match-limit');
+        const matchBankSpan = document.getElementById('match-bank');
+
+        const overheadInput = document.getElementById('overhead-percent');
+        const profitInput = document.getElementById('profit-percent');
+
+        const tzOutput = document.getElementById('tz-output');
+        const generateBtn = document.getElementById('generate-tz');
+        const printBtn = document.getElementById('print-tz');
+
+        // Установим значения полей процентов
+        overheadInput.value = overheadPercent;
+        profitInput.value = profitPercent;
+
+        // -------------------------------------------------------------
+        //  ОТРИСОВКА ТАБЛИЦЫ БЮДЖЕТА
+        // -------------------------------------------------------------
+        function renderBudget() {
+            tbodyBudget.innerHTML = '';
+            articles.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${a.code}</td><td>${a.name}</td>
+                    <td><input type="number" class="budget-input" data-code="${a.code}" value="${budget[a.code] || 0}" step="1" style="text-align:right"></td>`;
+                tbodyBudget.appendChild(tr);
+            });
+            document.querySelectorAll('.budget-input').forEach(inp => {
+                inp.addEventListener('input', function() {
+                    budget[this.dataset.code] = parseFloat(this.value) || 0;
+                    recalc();
+                    saveToStorage();
+                });
+            });
+        }
+
+        // -------------------------------------------------------------
+        //  ОТРИСОВКА ПРЯМЫХ ДОГОВОРОВ
+        // -------------------------------------------------------------
+        function renderDirect() {
+            tbodyDirect.innerHTML = '';
+            directRows.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" class="direct-supplier" data-index="${idx}" value="${row.supplier}" placeholder="Поставщик"></td>
+                    <td><input type="text" class="direct-contract" data-index="${idx}" value="${row.contract}" placeholder="№ договора"></td>
+                    <td><input type="number" class="direct-amount" data-index="${idx}" value="${row.amount}" step="1" style="text-align:right"></td>
+                    <td>
+                        <select class="direct-article" data-index="${idx}">
+                            ${articles.map(a => `<option value="${a.code}" ${a.code===row.article?'selected':''}>${a.code}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td><button class="btn btn-danger" style="padding:6px 12px;" onclick="removeDirect(${idx})">✕</button></td>
+                `;
+                tbodyDirect.appendChild(tr);
+            });
+
+            document.querySelectorAll('.direct-supplier, .direct-contract, .direct-amount, .direct-article').forEach(el => {
+                el.addEventListener('input', function() {
+                    const idx = this.dataset.index;
+                    if (this.classList.contains('direct-supplier')) directRows[idx].supplier = this.value;
+                    else if (this.classList.contains('direct-contract')) directRows[idx].contract = this.value;
+                    else if (this.classList.contains('direct-amount')) directRows[idx].amount = parseFloat(this.value) || 0;
+                    else if (this.classList.contains('direct-article')) directRows[idx].article = this.value;
+                    recalc();
+                    saveToStorage();
+                });
+            });
+        }
+
+        window.removeDirect = (idx) => { directRows.splice(idx, 1); renderDirect(); recalc(); saveToStorage(); };
+
+        addBtn.addEventListener('click', () => {
+            directRows.push({ supplier: '', contract: '', amount: 0, article: '2.1' });
+            renderDirect();
+            recalc();
+            saveToStorage();
+        });
+
+        // -------------------------------------------------------------
+        //  ФОРМАТИРОВАНИЕ ЧИСЕЛ
+        // -------------------------------------------------------------
+        function format(num) {
+            return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // -------------------------------------------------------------
+        //  ОСНОВНОЙ ПЕРЕСЧЁТ
+        // -------------------------------------------------------------
+        function recalc() {
+            // ---- 1. Общий бюджет Главы 2 ----
+            let totalBudget = 0;
+            articles.forEach(a => totalBudget += budget[a.code] || 0);
+            totalBudgetSpan.textContent = format(totalBudget);
+
+            // ---- 2. Сумма прямых договоров по каждой статье ----
+            let directByArticle = {};
+            articles.forEach(a => directByArticle[a.code] = 0);
+            directRows.forEach(r => { if (r.article) directByArticle[r.article] += r.amount; });
+
+            // ---- 3. Сумма статей 2.1–2.5 ----
+            let sumNonExcluded = 0;
+            articles.filter(a => !a.excluded).forEach(a => sumNonExcluded += budget[a.code] || 0);
+            sumNonExcludedSpan.textContent = format(sumNonExcluded);
+
+            // ---- 4. Сумма прямых по статьям 2.1–2.5 ----
+            let totalDirectForLimit = 0;
+            articles.filter(a => !a.excluded).forEach(a => totalDirectForLimit += directByArticle[a.code] || 0);
+            totalDirectLimitSpan.textContent = format(totalDirectForLimit);
+
+            // ---- 5. Лимит ----
+            let limit = sumNonExcluded - totalDirectForLimit;
+            limit = Math.max(limit, 0);
+            r4LimitSpan.textContent = format(limit);
+            r4TotalSpan.textContent = format(limit);
+
+            // ---- 6. Разбивка по процентам ----
+            let overheadPct = parseFloat(overheadInput.value) || 0;
+            let profitPct = parseFloat(profitInput.value) || 0;
+            let totalPct = 1 + overheadPct/100 + profitPct/100;
+            let directPart = limit / totalPct;
+            r4DirectSpan.textContent = format(directPart);
+            r4OverheadSpan.textContent = format(directPart * overheadPct/100);
+            r4ProfitSpan.textContent = format(directPart * profitPct/100);
+
+            // ---- 7. Смета для банка ----
+            const bankDisplay = [
+                { type: 'leaf', code: '2.1', name: 'Подготовительный период, в т.ч. устройство подкрановых путей, перебазировка, демонтаж, вынос сетей' },
+                { type: 'group', code: '2.2', name: 'Общестроительные работы, в т.ч.:', children: ['2.2.1','2.2.2'] },
+                { type: 'leaf', code: '2.2.1', name: 'Внутренняя отделка реализуемых площадей', indent: true },
+                { type: 'leaf', code: '2.2.2', name: 'Общестроительные работы (за исключением внутренней отделки)', indent: true },
+                { type: 'leaf', code: '2.3', name: 'Внутренние инженерные системы' },
+                { type: 'leaf', code: '2.4', name: 'Наружные инженерные сети, в т.ч. затраты на техприсоединение к ИС' },
+                { type: 'leaf', code: '2.5', name: 'Благоустройство и озеленение территории, объекты транспортного хозяйства' }
+            ];
+
+            let bankTotal = 0;
+            let bankHtml = '';
+
+            bankDisplay.forEach(item => {
+                if (item.type === 'group') {
+                    let budgetSum = 0, directSum = 0;
+                    item.children.forEach(c => {
+                        budgetSum += budget[c] || 0;
+                        directSum += directByArticle[c] || 0;
+                    });
+                    let gpSum = budgetSum - directSum;
+                    bankHtml += `<tr><td><strong>${item.code} ${item.name}</strong></td>
+                        <td class="text-right">${format(budgetSum)}</td>
+                        <td class="text-right">${format(directSum)}</td>
+                        <td class="text-right">${format(gpSum)}</td></tr>`;
+                } else {
+                    let budgetAmt = budget[item.code] || 0;
+                    let directAmt = directByArticle[item.code] || 0;
+                    let gpAmt = budgetAmt - directAmt;
+                    bankTotal += gpAmt;
+                    let indentClass = item.indent ? 'indent' : '';
+                    bankHtml += `<tr class="${indentClass}"><td>${item.code} ${item.name}</td>
+                        <td class="text-right">${format(budgetAmt)}</td>
+                        <td class="text-right">${format(directAmt)}</td>
+                        <td class="text-right">${format(gpAmt)}</td></tr>`;
+                }
+            });
+
+            tbodyBank.innerHTML = bankHtml;
+            bankTotalSpan.textContent = format(bankTotal);
+
+            // ---- 8. Контроль ----
+            matchLimitSpan.textContent = format(limit);
+            matchBankSpan.textContent = format(bankTotal);
+        }
+
+        // -------------------------------------------------------------
+        //  ГЕНЕРАЦИЯ ТЗ
+        // -------------------------------------------------------------
+        function getTZText() {
+            const overheadPct = parseFloat(overheadInput.value) || 0;
+            const profitPct = parseFloat(profitInput.value) || 0;
+
+            let directText = '';
+            directRows.forEach((r, i) => {
+                directText += `${i+1}. ${r.supplier || '—'}, договор ${r.contract || '—'}, сумма ${format(r.amount)} ₽ (статья ${r.article})\n`;
+            });
+
+            // сумма прямых по неисключаемым
+            let directSumNonExcluded = 0;
+            directRows.forEach(r => {
+                const art = articles.find(a => a.code === r.article);
+                if (art && !art.excluded) directSumNonExcluded += r.amount;
+            });
+
+            const sumNonExcluded = articles.filter(a => !a.excluded).reduce((s,a)=>s+(budget[a.code]||0),0);
+            const limit = parseFloat(r4LimitSpan.textContent.replace(/,/g,'')) || 0;
+            const directPart = parseFloat(r4DirectSpan.textContent.replace(/,/g,'')) || 0;
+            const overhead = parseFloat(r4OverheadSpan.textContent.replace(/,/g,'')) || 0;
+            const profit = parseFloat(r4ProfitSpan.textContent.replace(/,/g,'')) || 0;
+
+            let rows = '';
+            articles.filter(a => !a.excluded).forEach(a => {
+                let direct = directRows.filter(r => r.article === a.code).reduce((s,r)=>s+r.amount,0);
+                rows += `${a.code} ${a.name}: ${format(budget[a.code])} - ${format(direct)} = ${format(budget[a.code]-direct)} ₽\n`;
+            });
+
+            return `📋 ТЕХНИЧЕСКОЕ ЗАДАНИЕ ДЛЯ ОТДЕЛА ПТО
+=====================================
+Дата формирования: ${new Date().toLocaleDateString('ru-RU')}
+
+1️⃣ ИСХОДНЫЕ ДАННЫЕ (Глава 2, форма 6.1.2.)
+---------------------------------
+${articles.filter(a => !a.excluded).map(a => `${a.code} ${a.name}: ${format(budget[a.code])} ₽`).join('\n')}
+ИТОГО статьи 2.1–2.5: ${format(sumNonExcluded)} ₽
+
+2️⃣ ПРЯМЫЕ ДОГОВОРЫ (вычитаются)
+---------------------------------
+${directText || '— нет прямых договоров —'}
+
+3️⃣ РАСЧЁТНЫЕ ПАРАМЕТРЫ
+---------------------------------
+Накладные расходы: ${overheadPct}%
+Сметная прибыль: ${profitPct}%
+
+4️⃣ ЛИМИТ ДОГОВОРА ГЕНПОДРЯДЧИКА
+---------------------------------
+Сумма статей 2.1–2.5:       ${format(sumNonExcluded)} ₽
+Прямые поставки (2.1–2.5): - ${format(directSumNonExcluded)} ₽
+ЛИМИТ (база): = ${format(limit)} ₽
+
+Распределение лимита:
+  • Прямые затраты (себестоимость): ${format(directPart)} ₽
+  • Накладные расходы (${overheadPct}%): ${format(overhead)} ₽
+  • Сметная прибыль (${profitPct}%): ${format(profit)} ₽
+ИТОГО ДОГОВОР: ${format(limit)} ₽
+
+5️⃣ СМЕТА ДЛЯ БАНКА (по статьям)
+---------------------------------
+${rows}
+✅ Контрольная сумма: ${format(limit)} ₽
+
+👉 Прошу составить смету генподрядчика в соответствии с указанными лимитами и распределением.
+`;
+        }
+
+        function generateTZ() {
+            tzOutput.textContent = getTZText();
+            tzOutput.classList.add('show');
+        }
+
+        function printTZ() {
+            const tzText = getTZText();
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head><title>ТЗ для ПТО</title>
+                <style>
+                    body { font-family: 'Courier New', monospace; white-space: pre-wrap; padding: 2cm; }
+                </style>
+                </head>
+                <body>${tzText.replace(/\n/g, '<br>')}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        generateBtn.addEventListener('click', generateTZ);
+        printBtn.addEventListener('click', printTZ);
+
+        // -------------------------------------------------------------
+        //  ОБРАБОТЧИКИ ИЗМЕНЕНИЯ ПРОЦЕНТОВ
+        // -------------------------------------------------------------
+        overheadInput.addEventListener('input', () => {
+            recalc();
+            saveToStorage();
+        });
+        profitInput.addEventListener('input', () => {
+            recalc();
+            saveToStorage();
+        });
+
+        // -------------------------------------------------------------
+        //  ИНИЦИАЛИЗАЦИЯ
+        // -------------------------------------------------------------
+        renderBudget();
+        renderDirect();
+        recalc();
+    })();
+</script>
+</body>
+</html>
